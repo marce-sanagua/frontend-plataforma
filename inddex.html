@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Plataforma Inscripciones · Usuarios</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0f;
+      --surface: #16161a;
+      --border: #2a2a32;
+      --accent: #6ee7b7;
+      --accent2: #818cf8;
+      --danger: #f87171;
+      --text: #e4e4ef;
+      --muted: #6b6b7b;
+      --mono: 'Space Mono', monospace;
+      --sans: 'DM Sans', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      color: var(--accent);
+      letter-spacing: 0.05em;
+    }
+    .logo span { color: var(--muted); }
+    #status-bar {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--muted);
+      transition: background 0.3s;
+    }
+    .dot.on { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+
+    main {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 0;
+      height: 100%;
+    }
+
+    .panel-left {
+      border-right: 1px solid var(--border);
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .section-title {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+    }
+    .card h2 {
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      color: var(--text);
+      margin-bottom: 1.25rem;
+    }
+    label {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+      font-family: var(--mono);
+      letter-spacing: 0.04em;
+    }
+    input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--text);
+      padding: 0.6rem 0.8rem;
+      font-family: var(--sans);
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+    input:focus { border-color: var(--accent2); }
+
+    button {
+      width: 100%;
+      padding: 0.65rem 1rem;
+      border: none;
+      border-radius: 5px;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    button:active { transform: scale(0.98); }
+    .btn-primary {
+      background: var(--accent);
+      color: #0d0d0f;
+      font-weight: 700;
+    }
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      margin-top: 0.5rem;
+    }
+    .btn-secondary:hover { border-color: var(--accent2); color: var(--accent2); }
+    .btn-danger {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--danger);
+      margin-top: 0.5rem;
+    }
+    .btn-danger:hover { border-color: var(--danger); }
+
+    .msg {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      padding: 0.6rem 0.8rem;
+      border-radius: 4px;
+      margin-top: 0.75rem;
+      display: none;
+    }
+    .msg.show { display: block; }
+    .msg.ok { background: rgba(110,231,183,0.1); color: var(--accent); border: 1px solid rgba(110,231,183,0.3); }
+    .msg.err { background: rgba(248,113,113,0.1); color: var(--danger); border: 1px solid rgba(248,113,113,0.3); }
+
+    .token-box {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--accent2);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.5rem;
+      word-break: break-all;
+      max-height: 60px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+      opacity: 0.7;
+    }
+
+    .panel-right {
+      padding: 2rem;
+      overflow-y: auto;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    thead tr { border-bottom: 2px solid var(--border); }
+    th {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-align: left;
+      padding: 0.6rem 1rem;
+    }
+    td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+    .badge {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 3px;
+      background: rgba(129,140,248,0.15);
+      color: var(--accent2);
+      border: 1px solid rgba(129,140,248,0.25);
+    }
+    .badge.student {
+      background: rgba(110,231,183,0.1);
+      color: var(--accent);
+      border-color: rgba(110,231,183,0.25);
+    }
+
+    .empty {
+      text-align: center;
+      padding: 3rem;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 0.8rem;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 0.75rem 2rem;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    @media (max-width: 700px) {
+      main { grid-template-columns: 1fr; }
+      .panel-left { border-right: none; border-bottom: 1px solid var(--border); }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">plataforma_inscripciones <span>/ ms-usuarios</span></div>
+  <div id="status-bar">
+    <div class="dot" id="dot"></div>
+    <span id="status-text">desconectado</span>
+  </div>
+</header>
+
+<main>
+  <aside class="panel-left">
+
+    <!-- LOGIN -->
+    <div id="login-section">
+      <p class="section-title">Autenticación</p>
+      <div class="card">
+        <h2>// login</h2>
+        <label>email</label>
+        <input type="email" id="login-email" placeholder="usuario@mail.com" />
+        <label>contraseña</label>
+        <input type="password" id="login-pass" placeholder="••••••••" />
+        <button class="btn-primary" onclick="doLogin()">INICIAR SESIÓN</button>
+        <div id="login-msg" class="msg"></div>
+      </div>
+    </div>
+
+    <!-- SESSION -->
+    <div id="session-section" style="display:none">
+      <p class="section-title">Sesión activa</p>
+      <div class="card">
+        <h2>// token</h2>
+        <div class="token-box" id="token-display">—</div>
+        <button class="btn-danger" onclick="doLogout()">CERRAR SESIÓN</button>
+      </div>
+
+      <p class="section-title" style="margin-top:1.5rem">Ruta protegida</p>
+      <div class="card">
+        <h2>// POST /usuarios</h2>
+        <label>nombre</label>
+        <input type="text" id="new-nombre" placeholder="Nombre Apellido" />
+        <label>email</label>
+        <input type="email" id="new-email" placeholder="nuevo@mail.com" />
+        <label>contraseña</label>
+        <input type="password" id="new-pass" placeholder="••••••••" />
+        <label>rol</label>
+        <input type="text" id="new-rol" placeholder="student / admin" />
+        <button class="btn-primary" onclick="crearUsuario()">CREAR USUARIO</button>
+        <div id="create-msg" class="msg"></div>
+      </div>
+    </div>
+
+  </aside>
+
+  <section class="panel-right">
+    <div class="top-bar">
+      <p class="section-title" style="margin-bottom:0">GET /usuarios</p>
+      <button class="btn-secondary" style="width:auto;padding:0.4rem 1rem;" onclick="cargarUsuarios()">↻ actualizar</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Rol</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-usuarios">
+          <tr><td colspan="4" class="empty">cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<footer>
+  
+  <span id="footer-info">sin sesión</span>
+</footer>
+
+<script>
+   
+const API = "https://users-api-rmm5.onrender.com";
+
+  function getToken() { return localStorage.getItem("jwt_token"); }
+  function setToken(t) { localStorage.setItem("jwt_token", t); }
+  function clearToken() { localStorage.removeItem("jwt_token"); }
+
+  function showMsg(id, text, tipo) {
+    const el = document.getElementById(id);
+    el.textContent = text;
+    el.className = `msg show ${tipo}`;
+  }
+
+  function setStatus(on, text) {
+    document.getElementById("dot").className = "dot" + (on ? " on" : "");
+    document.getElementById("status-text").textContent = text;
+  }
+
+  async function doLogin() {
+    const email = document.getElementById("login-email").value.trim();
+    const pass  = document.getElementById("login-pass").value.trim();
+    if (!email || !pass) { showMsg("login-msg", "Completá los campos", "err"); return; }
+
+    try {
+      const res = await fetch(`${API}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password: pass })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        showMsg("login-msg", data.error || "Credenciales incorrectas", "err");
+        setStatus(false, "sin sesión");
+        return;
+      }
+
+      setToken(data.token);
+      mostrarSesion(data.token);
+      setStatus(true, "autenticado");
+      cargarUsuarios();
+
+    } catch (e) {
+      showMsg("login-msg", "Error al conectar con el backend", "err");
+    }
+  }
+
+  function mostrarSesion(token) {
+    document.getElementById("login-section").style.display = "none";
+    document.getElementById("session-section").style.display = "block";
+    document.getElementById("token-display").textContent = token;
+    document.getElementById("footer-info").textContent = "sesión activa · token en localStorage";
+  }
+
+  function doLogout() {
+    clearToken();
+    document.getElementById("login-section").style.display = "block";
+    document.getElementById("session-section").style.display = "none";
+    document.getElementById("token-display").textContent = "—";
+    setStatus(false, "desconectado");
+    document.getElementById("footer-info").textContent = "sin sesión";
+  }
+
+  async function cargarUsuarios() {
+    const tbody = document.getElementById("tabla-usuarios");
+    tbody.innerHTML = `<tr><td colspan="4" class="empty">cargando...</td></tr>`;
+    try {
+      const res = await fetch(`${API}/usuarios`);
+      const data = await res.json();
+      if (!data.length) {
+        tbody.innerHTML = `<tr><td colspan="4" class="empty">no hay usuarios</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = data.map(u => `
+        <tr>
+          <td>${u.id}</td>
+          <td>${u.nombre ?? "—"}</td>
+          <td>${u.email ?? "—"}</td>
+          <td><span class="badge ${u.rol === 'alumno' ? 'alumno' : ''}">${u.rol ?? "—"}</span></td>
+        </tr>
+      `).join("");
+    } catch {
+      tbody.innerHTML = `<tr><td colspan="4" class="empty" style="color:var(--danger)">error al cargar usuarios</td></tr>`;
+    }
+  }
+
+  async function crearUsuario() {
+    const token = getToken();
+    if (!token) {
+      showMsg("create-msg", "Tenés que iniciar sesión primero", "err");
+      return;
+    }
+
+    const nombre = document.getElementById("new-nombre").value.trim();
+    const email  = document.getElementById("new-email").value.trim();
+    const pass   = document.getElementById("new-pass").value.trim();
+    const rol    = document.getElementById("new-rol").value.trim();
+
+    if (!nombre || !email || !pass || !rol) {
+      showMsg("create-msg", "Completá todos los campos", "err");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API}/usuarios`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ nombre, email, password: pass, rol })
+      });
+
+      const data = await res.json();
+
+      if (res.status === 401) {
+        showMsg("create-msg", "No autorizado: " + (data.error || "token inválido"), "err");
+        return;
+      }
+      if (!res.ok) {
+        showMsg("create-msg", data.error || "Error al crear usuario", "err");
+        return;
+      }
+
+      showMsg("create-msg", `✓ Usuario creado (id: ${data.id})`, "ok");
+      document.getElementById("new-nombre").value = "";
+      document.getElementById("new-email").value = "";
+      document.getElementById("new-pass").value = "";
+      document.getElementById("new-rol").value = "";
+      cargarUsuarios();
+
+    } catch (e) {
+      showMsg("create-msg", "Error al conectar con el backend", "err");
+    }
+  }
+
+  const savedToken = getToken();
+  if (savedToken) {
+    mostrarSesion(savedToken);
+    setStatus(true, "autenticado");
+  }
+  cargarUsuarios();
+</script>
+</body>
+</html>
