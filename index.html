@@ -301,7 +301,7 @@
       <label>contraseña</label>
       <input type="password" id="new-pass" placeholder="••••••••" />
       <label>rol</label>
-      <input type="text" id="new-rol" placeholder="student / admin" />
+      <input type="text" id="new-rol" placeholder="alumno / admin" />
       <button class="btn-primary" onclick="crearUsuario()">CREAR USUARIO</button>
       <div id="create-msg" class="msg"></div>
     </div>
@@ -425,10 +425,10 @@ const API = "https://users-api-rmm5.onrender.com";
 
   async function crearUsuario() {
     const token = getToken();
-    if (!token) {
+    /*if (!token) {
       showMsg("create-msg", "Tenés que iniciar sesión primero", "err");
       return;
-    }
+    }*/
 
     const nombre = document.getElementById("new-nombre").value.trim();
     const email  = document.getElementById("new-email").value.trim();
@@ -443,10 +443,10 @@ const API = "https://users-api-rmm5.onrender.com";
     try {
       const res = await fetch(`${API}/usuarios`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
+       headers: {
+  "Content-Type": "application/json",
+  ...(token && { "Authorization": `Bearer ${token}` })
+},
         body: JSON.stringify({ nombre, email, password: pass, rol })
       });
 
